@@ -341,4 +341,14 @@ public class MainActivity extends Activity implements ClusterDrawerFragment.Clus
     void connectionFailure(@Receiver.Extra(Broadcasts.Extras.CONNECTION_FAILURE_REASON) String reason) {
         Toast.makeText(MainActivity.this, R.string.disconnected + " " + reason, Toast.LENGTH_LONG).show();
     }
+
+    @Receiver(actions = Broadcasts.MQTT_CONNECTED)
+    void mqttConnected() {
+        Toast.makeText(this, "MQTT Connected!", Toast.LENGTH_LONG).show();
+    }
+
+    @Receiver(actions = Broadcasts.MQTT_DISCONNECTED)
+    void mqttDisconnected() {
+        Toast.makeText(this, "MQTT Disconnected!", Toast.LENGTH_LONG).show();
+    }
 }

@@ -4,11 +4,13 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
+import org.ovirt.mobile.movirt.Broadcasts;
 import org.ovirt.mobile.movirt.auth.AuthenticatorService;
 import org.ovirt.mobile.movirt.provider.OVirtContract;
 
@@ -66,6 +68,8 @@ public class SyncUtils {
      * the OS additional freedom in scheduling your sync request.
      */
     public void triggerRefresh() {
+        context.sendBroadcast(new Intent(Broadcasts.REFRESH_TRIGGERED));
+
         Bundle b = new Bundle();
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);

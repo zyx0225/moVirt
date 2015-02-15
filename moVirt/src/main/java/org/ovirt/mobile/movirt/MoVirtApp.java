@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EApplication;
+import org.ovirt.mobile.movirt.mqtt.MqttService_;
 import org.ovirt.mobile.movirt.sync.SyncUtils;
 
 @EApplication
@@ -29,6 +30,8 @@ public class MoVirtApp extends Application {
         context = this;
 
         syncUtils.createSyncAccount();
+
+        MqttService_.intent(this).start();
     }
 
     public boolean endpointConfigured() {
