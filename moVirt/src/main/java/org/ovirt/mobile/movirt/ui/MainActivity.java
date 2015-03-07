@@ -53,6 +53,7 @@ import org.ovirt.mobile.movirt.sync.EventsHandler;
 import org.ovirt.mobile.movirt.sync.SyncUtils;
 import org.ovirt.mobile.movirt.ui.triggers.EditTriggersActivity;
 import org.ovirt.mobile.movirt.ui.triggers.EditTriggersActivity_;
+import org.ovirt.mobile.movirt.ui.vms.VmsFragment;
 import org.ovirt.mobile.movirt.util.CursorAdapterLoader;
 
 import static org.ovirt.mobile.movirt.provider.OVirtContract.NamedEntity.NAME;
