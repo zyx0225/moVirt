@@ -58,6 +58,12 @@ public interface OVirtRestClient extends RestClientRootUrl, RestClientHeaders, R
     @Get("/vms/{id}/disks")
     Disks getDisks(String id);
 
+    @Get("/hosts")
+    Hosts getHosts();
+
+    @Get("/hosts/{id}")
+    Host getHost(String id);
+
     @Get("/")
     EmptyResult login();
 

@@ -29,7 +29,20 @@
             android:layout_height="match_parent">
             <fragment
                 android:id="@+id/vmsList"
-                class="org.ovirt.mobile.movirt.ui.VmsFragment_"
+                class="org.ovirt.mobile.movirt.ui.vms.VmsFragment_"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/hostsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <fragment
+                android:id="@+id/hostsList"
+                class="org.ovirt.mobile.movirt.ui.hosts.HostsFragment_"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"

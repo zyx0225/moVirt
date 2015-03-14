@@ -22,6 +22,7 @@ import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.ovirt.mobile.movirt.Broadcasts;
 import org.ovirt.mobile.movirt.R;
+import org.ovirt.mobile.movirt.facade.VmFacade;
 import org.ovirt.mobile.movirt.model.Vm;
 import org.ovirt.mobile.movirt.model.trigger.Trigger;
 import org.ovirt.mobile.movirt.rest.ActionTicket;
@@ -68,7 +69,7 @@ public class VmDetailActivity extends ActionBarActivity implements TabChangedLis
     ProgressBar progress;
 
     @Bean
-    SyncAdapter syncAdapter;
+    VmFacade vmFacade;
 
     @AfterViews
     void init() {
@@ -160,7 +161,7 @@ public class VmDetailActivity extends ActionBarActivity implements TabChangedLis
     @OptionsItem(R.id.action_console)
     @Background
     void openConsole() {
-        syncAdapter.syncVm(vmId, new ProgressBarResponse<Vm>(this) {
+        vmFacade.sync(vmId, new ProgressBarResponse<Vm>(this) {
 
             @Override
             public void onResponse(final Vm freshVm) throws RemoteException {
@@ -185,7 +186,7 @@ public class VmDetailActivity extends ActionBarActivity implements TabChangedLis
     }
 
     private void syncVm() {
-        syncAdapter.syncVm(vmId, new ProgressBarResponse<Vm>(this));
+        vmFacade.sync(vmId, new ProgressBarResponse<Vm>(this));
     }
 
     /**

@@ -104,4 +104,5 @@
     <string name="account_enforceHttpBasicAuth">Enforce HTTP Basic Authentication</string>
     <string name="account_disableHttpsChecking_summary">This method is dangerous and should not be used in production setup.</string>
     <string name="name">Name</string>
+    <string name="title_activity_host_details">Host Details</string>
 </resources>

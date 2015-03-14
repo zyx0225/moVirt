@@ -51,6 +51,7 @@ import org.ovirt.mobile.movirt.provider.ProviderFacade;
 import org.ovirt.mobile.movirt.rest.OVirtClient;
 import org.ovirt.mobile.movirt.sync.EventsHandler;
 import org.ovirt.mobile.movirt.sync.SyncUtils;
+import org.ovirt.mobile.movirt.ui.hosts.HostsFragment;
 import org.ovirt.mobile.movirt.ui.triggers.EditTriggersActivity;
 import org.ovirt.mobile.movirt.ui.triggers.EditTriggersActivity_;
 import org.ovirt.mobile.movirt.ui.vms.VmsFragment;
@@ -87,11 +88,17 @@ public class MainActivity extends ActionBarActivity implements TabChangedListene
     @FragmentById
     VmsFragment vmsList;
 
+    @FragmentById
+    HostsFragment hostsList;
+
     @ViewById
     View vmsLayout;
 
     @ViewById
     View eventsLayout;
+
+    @ViewById
+    View hostsLayout;
 
     @ViewById
     ListView clusterDrawer;
@@ -156,6 +163,7 @@ public class MainActivity extends ActionBarActivity implements TabChangedListene
     private void initTabs() {
         vmsLayout.setVisibility(currentlyShown == TabChangedListener.CurrentlyShown.VMS ? View.VISIBLE : View.GONE);
         eventsLayout.setVisibility(currentlyShown == TabChangedListener.CurrentlyShown.EVENTS ? View.VISIBLE : View.GONE);
+        hostsLayout.setVisibility(currentlyShown == TabChangedListener.CurrentlyShown.HOSTS ? View.VISIBLE : View.GONE);
 
         TabChangedListener.CurrentlyShown tmpCurrentlyShown = currentlyShown;
 
@@ -166,6 +174,12 @@ public class MainActivity extends ActionBarActivity implements TabChangedListene
                 .setTabListener(new TabChangedListener(vmsLayout, TabChangedListener.CurrentlyShown.VMS, this));
 
         getSupportActionBar().addTab(vmsTab);
+
+        ActionBar.Tab hostsTab = getSupportActionBar().newTab()
+                .setText("Hosts")
+                .setTabListener(new TabChangedListener(hostsLayout, TabChangedListener.CurrentlyShown.HOSTS, this));
+
+        getSupportActionBar().addTab(hostsTab);
 
         ActionBar.Tab eventsTab = getSupportActionBar().newTab()
                 .setText("Events")
@@ -348,6 +362,10 @@ public class MainActivity extends ActionBarActivity implements TabChangedListene
 
         if (vmsList != null) {
             vmsList.updateFilterClusterIdTo(selectedClusterId);
+        }
+
+        if (hostsList != null) {
+            hostsList.updateFilterClusterIdTo(selectedClusterId);
         }
 
         drawerLayout.closeDrawers();

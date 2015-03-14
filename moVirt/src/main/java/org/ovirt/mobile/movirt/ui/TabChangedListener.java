@@ -9,7 +9,7 @@ public class TabChangedListener implements ActionBar.TabListener  {
     private CurrentlyShown shown;
     private HasCurrentlyShown hasCurrentlyShown;
 
-    TabChangedListener(View view, CurrentlyShown shown, HasCurrentlyShown hasCurrentlyShown) {
+    public TabChangedListener(View view, CurrentlyShown shown, HasCurrentlyShown hasCurrentlyShown) {
         this.view = view;
         this.shown = shown;
         this.hasCurrentlyShown = hasCurrentlyShown;
@@ -32,7 +32,7 @@ public class TabChangedListener implements ActionBar.TabListener  {
     }
 
     public static enum CurrentlyShown {
-        VMS, EVENTS,
+        VMS, EVENTS, HOSTS,
         VM_DETAIL_GENERAL, DISKS
     }
 
