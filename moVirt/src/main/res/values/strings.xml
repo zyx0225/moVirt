@@ -37,6 +37,7 @@
     <string name="edit_triggers">Triggers</string>
     <string name="save">Save</string>
     <string name="save_acc">Save Account</string>
+    <string name="import_ca_crt">Import Certificate Authority (CA)</string>
     <string name="trigger_scope">Editing triggers for: </string>
     <string name="add_trigger">Add Trigger</string>
     <string name="whole_datacenter">Whole datacenter</string>

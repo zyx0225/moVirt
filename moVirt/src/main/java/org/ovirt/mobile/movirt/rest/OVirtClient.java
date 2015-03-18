@@ -177,7 +177,7 @@ public class OVirtClient {
         restClient.setRootUrl(apiUrl);
         restClient.setHttpBasicAuth(username, password);
         restClient.setCookie("JSESSIONID", "");
-        requestFactory.setIgnoreHttps(disableHttps);
+        requestFactory.setCertificateHandlingMode(OvirtSimpleClientHttpRequestFactory.CertificateHandlingMode.TRUST_IMPORTED_CERTIFICATE);
         restClient.setHeader(FILTER, Boolean.toString(!hasAdminPrivileges));
         restClient.login();
         String sessionId = restClient.getCookie("JSESSIONID");
@@ -385,7 +385,8 @@ public class OVirtClient {
 
     private void updateClientBeforeCall() {
         restClient.setHeader(FILTER, Boolean.toString(!authenticator.hasAdminPermissions()));
-        requestFactory.setIgnoreHttps(authenticator.disableHttps());
+//        requestFactory.setCertificateHandlingMode(authenticator.disableHttps());
+        requestFactory.setCertificateHandlingMode(OvirtSimpleClientHttpRequestFactory.CertificateHandlingMode.TRUST_IMPORTED_CERTIFICATE);
         restClient.setRootUrl(authenticator.getApiUrl());
     }
 

@@ -24,13 +24,39 @@ import org.androidannotations.annotations.ViewById;
 import org.ovirt.mobile.movirt.Broadcasts;
 import org.ovirt.mobile.movirt.R;
 import org.ovirt.mobile.movirt.auth.MovirtAuthenticator;
+import org.ovirt.mobile.movirt.model.CaCert;
 import org.ovirt.mobile.movirt.provider.OVirtContract;
+import org.ovirt.mobile.movirt.provider.ProviderFacade;
+import org.ovirt.mobile.movirt.rest.NullHostnameVerifier;
 import org.ovirt.mobile.movirt.rest.OVirtClient;
 import org.ovirt.mobile.movirt.sync.EventsHandler;
 import org.ovirt.mobile.movirt.sync.SyncUtils;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 @EActivity(R.layout.authenticator_activity)
 public class AuthenticatorActivity extends AccountAuthenticatorActivity {
+
+    @Bean
+    NullHostnameVerifier verifier;
 
     @SystemService
     AccountManager accountManager;
@@ -68,6 +94,11 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     @Bean
     EventsHandler eventsHandler;
 
+    @Bean
+    ProviderFacade providerFacade;
+
+    Certificate ca = null;
+
     @AfterViews
     void init() {
         txtEndpoint.setText(authenticator.getApiUrl());
@@ -78,6 +109,130 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         chkDisableHttps.setChecked(authenticator.disableHttps());
         enforceHttpBasicAuth.setChecked(authenticator.enforceBasicAuth());
 
+    }
+
+    @Click(R.id.btnImportCaCrt)
+    void importCaCrt() {
+        downloadCa();
+    }
+
+    @Background
+    void downloadCa() {
+        String endpoint = txtEndpoint.getText().toString();
+        // todo open a dialog showing the path precofigured properly but changable
+        URL url = null;
+        try {
+            url = new URL(endpoint);
+            url = new URL(url.getProtocol() + "://" + url.getAuthority() + "/ca.crt");
+        } catch (MalformedURLException e) {
+            showToast("The endpoint is not a valid URL");
+            return;
+        }
+
+        CertificateFactory cf = null;
+        try {
+            cf = CertificateFactory.getInstance("X.509");
+        } catch (CertificateException e) {
+            showToast("Problem getting the certificate factory: " + e.getMessage());
+            return;
+        }
+
+        InputStream caInput = null;
+
+        SSLSocketFactory properSocketFactory = null;
+        try {
+            URLConnection connection = url.openConnection();
+            if (connection instanceof HttpsURLConnection) {
+                // do not check the crt since we first need to download it from a not yet trusted source
+                properSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
+                TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return new java.security.cert.X509Certificate[] {};
+                    }
+
+                    public void checkClientTrusted(X509Certificate[] chain,
+                                                   String authType) throws CertificateException {
+                    }
+
+                    public void checkServerTrusted(X509Certificate[] chain,
+                                                   String authType) throws CertificateException {
+                    }
+                }
+                };
+
+                // Install the all-trusting trust manager
+                try {
+                    SSLContext sc = SSLContext.getInstance("TLS");
+                    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                    HttpsURLConnection
+                            .setDefaultSSLSocketFactory(sc.getSocketFactory());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                ((HttpsURLConnection) connection).setHostnameVerifier(verifier);
+            }
+
+            caInput = new BufferedInputStream(url.openStream());
+        } catch (IOException e) {
+            showToast("Error loading certificate: " + e.getMessage());
+            return;
+        }
+
+        Certificate ca = null;
+        try {
+            ca = cf.generateCertificate(caInput);
+            // todo show it in dialog and proceed only if agreed
+            okImportCa(ca);
+            System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+        } catch (CertificateException e) {
+            showToast("Error CA generation: " + e.getMessage());
+            return;
+        } finally {
+            try {
+                caInput.close();
+                if (properSocketFactory != null) {
+                    HttpsURLConnection.setDefaultSSLSocketFactory(properSocketFactory);
+                }
+            } catch (IOException e) {
+                // really nothing to do about this one...
+            }
+        }
+    }
+
+    void okImportCa(Certificate ca) {
+        this.ca = ca;
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutput out = null;
+        try {
+            try {
+                out = new ObjectOutputStream(bos);
+                out.writeObject(ca);
+                byte[] caAsBlob = bos.toByteArray();
+                CaCert caCertEntity = new CaCert();
+                // nvm, only support one
+                caCertEntity.setId(1);
+                caCertEntity.setContent(caAsBlob);
+                providerFacade.deleteAll(OVirtContract.CaCert.CONTENT_URI);
+                providerFacade.batch().insert(caCertEntity).apply();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException ex) {
+                // ignore close exception
+            }
+            try {
+                bos.close();
+            } catch (IOException ex) {
+                // ignore close exception
+            }
+        }
     }
 
     @Click(R.id.btnCreate)
@@ -167,6 +322,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         accountManager.setUserData(account, MovirtAuthenticator.HAS_ADMIN_PERMISSIONS, Boolean.toString(hasAdminPermissions));
         accountManager.setUserData(account, MovirtAuthenticator.DISABLE_HTTPS, Boolean.toString(disableHttps));
         accountManager.setUserData(account, MovirtAuthenticator.ENFORCE_HTTP_BASIC, Boolean.toString(enforceHttpBasic));
+        accountManager.getUserData(account, MovirtAuthenticator.API_URL);
         accountManager.setPassword(account, password);
     }
 

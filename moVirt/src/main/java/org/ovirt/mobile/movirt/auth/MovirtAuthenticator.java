@@ -38,6 +38,8 @@ public class MovirtAuthenticator extends AbstractAccountAuthenticator {
 
     public static final String ENFORCE_HTTP_BASIC = "org.ovirt.mobile.movirt.enforceHttpBasic";
 
+    public static final String CUSTOM_CERTIFICATE = "org.ovirt.mobile.movirt.customCertificate";
+
     public static final Account MOVIRT_ACCOUNT = new Account(MovirtAuthenticator.ACCOUNT_NAME, MovirtAuthenticator.ACCOUNT_TYPE);
 
     @Bean

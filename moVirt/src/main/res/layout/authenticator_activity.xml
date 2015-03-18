@@ -54,6 +54,12 @@
         android:visibility="gone" />
 
     <Button
+        android:id="@+id/btnImportCaCrt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/import_ca_crt"/>
+
+    <Button
         android:id="@+id/btnCreate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
