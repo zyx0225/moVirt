@@ -1,6 +1,7 @@
 package org.ovirt.mobile.movirt.ui.dashboard;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.widget.GridView;
