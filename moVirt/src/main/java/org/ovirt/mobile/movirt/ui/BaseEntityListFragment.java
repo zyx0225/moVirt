@@ -37,8 +37,8 @@ import org.ovirt.mobile.movirt.util.CursorAdapterLoader;
 import static org.ovirt.mobile.movirt.provider.OVirtContract.Vm.HOST_ID;
 
 @EFragment(R.layout.fragment_base_entity_list)
-public abstract class BaseEntityListFragment<E extends OVirtEntity> extends RefreshableFragment
-        implements OVirtContract.HasCluster, OVirtContract.NamedEntity, SelectedClusterAware, HasLoader {
+public abstract class BaseEntityListFragment<E extends OVirtEntity> extends RefreshableLoaderFragment
+        implements OVirtContract.HasCluster, OVirtContract.NamedEntity, SelectedClusterAware{
 
     private static final int ITEMS_PER_PAGE = 20;
 
@@ -75,6 +75,8 @@ public abstract class BaseEntityListFragment<E extends OVirtEntity> extends Refr
     private EntityFacade<E> entityFacade;
 
     private final Class<E> entityClass;
+
+    private boolean isResetListNeeded = false;
 
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
@@ -125,9 +127,15 @@ public abstract class BaseEntityListFragment<E extends OVirtEntity> extends Refr
 
     @Override
     public void updateSelectedClusterId(String selectedClusterId) {
-        resetListViewPosition();
         this.selectedClusterId = selectedClusterId;
-        restartLoader();
+
+        if (isResumed()) {
+            resetListViewPosition();
+            restartLoader();
+            isResetListNeeded = false;
+        } else {
+            isResetListNeeded = true;
+        }
     }
 
     class RestartOrderItemSelectedListener implements AdapterView.OnItemSelectedListener {
@@ -213,11 +221,14 @@ public abstract class BaseEntityListFragment<E extends OVirtEntity> extends Refr
 
     @Override
     public void onResume() {
+        if (isResetListNeeded) {
+            resetListViewPosition();
+            isResetListNeeded = false;
+        }
+
         super.onResume();
 
         setRefreshing(SyncAdapter.inSync);
-
-        restartLoader();
     }
 
     @Override
@@ -225,8 +236,6 @@ public abstract class BaseEntityListFragment<E extends OVirtEntity> extends Refr
         super.onPause();
 
         setRefreshing(false);
-
-        destroyLoader();
     }
 
     @ItemClick(android.R.id.list)
